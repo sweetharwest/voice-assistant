@@ -35,12 +35,10 @@
             </div>
         </div>
     </div>
-    <div>
-        <button @click="testButton">myButton</button>
-    </div>
 </template>
 
 <script>
+import * as pr from "./process.js";
 export default {
     data() {
         return {
@@ -52,10 +50,11 @@ export default {
             keyboard: false,
             keyboardText: '',
             questions: ['Как отправить работу?',
-                        'Запиши что-нибудь',
-                        'Отправь',
-                        'Перечисли',
-                        'Выбери'],
+                        'Что ты умеешь?',
+                        'Нажми кнопку отправить',
+                        'Запиши молоко в поле контрольная работа',
+                        'Выбери 1 в вариант',
+                        'Перечисли варианты в вариант'],
         };
     },
     mounted() {
@@ -65,18 +64,6 @@ export default {
         this.recognition.interimResults = false;
         this.recognition.lang = 'ru-RU';
 
-        /*//слушает много раз
-        this.recognition.onresult = (event) => {
-            let interimTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                interimTranscript += event.results[i][0].transcript;
-            }
-            if (interimTranscript.length > 0) {
-                this.recognizedText = interimTranscript;
-            }
-        };*/
-
-        //слушает один раз
         this.recognition.onresult = (event) => {
             this.recognizedText = event.results[0][0].transcript;
             this.addMessage(this.recognizedText);
@@ -102,69 +89,9 @@ export default {
             window.speechSynthesis.cancel();
         },
         process(input) {
-            input = input.toLowerCase();
-            input = input.replace(/[.,!?]/g, "").replace(/\s{2,}/g, " ");
-            if (input.includes("отправить работу")) {
-                this.answer = "Для того чтобы отправить работу нужно выбрать название контрольной, вариант работы и задание. После этого прикрепить файлы и нажать кнопку отправить.";
-                this.addMessage(this.answer);
-                this.speakResponse(this.answer);
-            } else if (input.startsWith("запиши")) {
-                this.addMessage('команда распознана');
-                const testInputElement = document.getElementById('testInput');
-                testInputElement.value = input.slice(7);
-            } else if (input.includes('отправь')) {
-                const testButtonElement = document.getElementById('testButton');
-                testButtonElement.click();
-                this.addMessage('команда выполнена');
-                this.speakResponse('команда выполнена');
-            } else if (input.includes('перечисли')) {
-                const testSelectElement = document.getElementById('testSelect');
-                let answer = 'варианты выбора:';
-                for (let i = 0; i < testSelectElement.length; i++) {
-                    answer +=  '\n\t-' + testSelectElement[i].value;
-                }
-                this.addMessage(answer);
-                this.speakResponse(answer);
-            } else if (input.includes('выбери')) {
-                const testSelectElement = document.getElementById('testSelect');
-                let option = input.slice(7);
-                //alert('-' + option + '-');
-                let flag = false;
-                let answer = '';
-                /*switch (option)
-                {
-                    case '1':
-                        testSelectElement[1].selected = true;
-                        flag = true;
-                        break;
-                    case '2':
-                        testSelectElement[2].selected = true;
-                        flag = true;
-                        break;
-                    case '3':
-                        testSelectElement[3].selected = true;
-                        flag = true;
-                        break;
-                }*/
-                for (let i = 0; i < testSelectElement.length; i++) {
-                    //alert(testSelectElement[i].value);
-                    if (testSelectElement[i].value == option) {
-                        testSelectElement[i].selected = true;
-                        flag = true;
-                    }
-                }
-                if (flag) {
-                    answer = 'команды выполнена';
-                } else {
-                    answer = 'нет такого варианта';
-                }
-                this.addMessage(answer);
-                this.speakResponse(answer);
-            } else {
-                this.answer = "Нет ответа";
-                this.addMessage(this.answer);
-                this.speakResponse(this.answer);
-            }
+            let answer = pr.process(input);
+            this.addMessage(answer);
+            this.speakResponse(answer);
         },
         speakResponse(response) {
             const synth = window.speechSynthesis;
@@ -190,10 +117,6 @@ export default {
                 output += '\n\t' + '- ' + this.questions[i];
             }
             this.addMessage(output);
-        },
-        testButton() {
-            const element = document.getElementById('testSelect');
-            element[2].selected = true;
         },
         sendText() {
             this.addMessage(this.keyboardText);
@@ -224,7 +147,6 @@ export default {
     margin-bottom: 5px;
     display: flex;
     justify-content: space-between;
-    background-color: #04aa6d;
 }
 
 .keyboard-input {
@@ -290,7 +212,6 @@ li:hover {
 .control-panel {
     display: flex;
     justify-content: space-between;
-    background-color: #04aa6d;
 }
 
 .control-panel-left {

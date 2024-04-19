@@ -7,14 +7,20 @@
     </header>
 
     <main>
-        <input id="testInput" type="text" placeholder="Введите текст" />
-        <button id="testButton" @click="testButtonDo">отправить</button>
-        <select name="testSelect" id="testSelect">
-            <option value="">--Please choose an option--</option>
-            <option value="1">первый</option>
-            <option value="2">второй</option>
-            <option value="3">третий</option>
-        </select>
+        <div>
+            <p>контрольная работа</p>
+            <input id="testInput" type="text" placeholder="Введите текст" />
+            <button id="testButton" @click="testButtonDo">отправить</button>
+        </div>
+        <div>
+            <p>вариант</p>
+            <select name="testSelect" id="testSelect">
+                <option value="">Выберите вариант</option>
+                <option value="1">первый</option>
+                <option value="2">второй</option>
+                <option value="3">третий</option>
+            </select>
+        </div>
         <Assistant />
     </main>
 </template>
