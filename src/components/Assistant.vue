@@ -29,7 +29,7 @@
                 </button>
             </div>
             <div class="control-panel-right">
-                <button class="a-button" @click="showQuestions">
+                <button class="a-button" @click="showInfo">
                     <img src="./icons/question.png" alt="question">
                 </button>
             </div>
@@ -38,7 +38,8 @@
 </template>
 
 <script>
-import * as pr from "./process.js";
+import {Process} from "@/components/process.js";
+import {SpeechSettings} from "@/components/speechSettings.js";
 export default {
     data() {
         return {
@@ -49,13 +50,18 @@ export default {
             messages: [],
             keyboard: false,
             keyboardText: '',
-            questions: ['Как отправить работу?',
+            Process: null,
+            info: ['Как отправить работу?',
                         'Что ты умеешь?',
                         'Нажми кнопку отправить',
                         'Запиши молоко в поле контрольная работа',
-                        'Выбери 1 в вариант',
+                        'Выбери вариант 1',
                         'Перечисли варианты в вариант'],
         };
+    },
+    props: {
+        questions: Array,
+        commands: Array,
     },
     mounted() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -63,6 +69,8 @@ export default {
         this.recognition.continuous = true;
         this.recognition.interimResults = false;
         this.recognition.lang = 'ru-RU';
+
+        this.Process = new Process(this.questions, this.commands);
 
         this.recognition.onresult = (event) => {
             this.recognizedText = event.results[0][0].transcript;
@@ -88,33 +96,17 @@ export default {
         stopSpeechSynthesis() {
             window.speechSynthesis.cancel();
         },
-        process(input) {
-            let answer = pr.process(input);
-            this.addMessage(answer);
-            this.speakResponse(answer);
-        },
-        speakResponse(response) {
-            const synth = window.speechSynthesis;
-            const utterance = new SpeechSynthesisUtterance(response);
-            utterance.lang = "ru-RU";           // аббревиатура языка
-            utterance.volume = 1;          // громкость
-            utterance.rate = 0.8;            // скорость
-            utterance.pitch = 0.3;
-            const voices = speechSynthesis.getVoices();
-            utterance.voice = voices[4]; //4 - men, 0 - women
-            synth.speak(utterance);
-        },
         addMessage(message) {
             this.messages.push(message);
             this.$nextTick(() => {
                 this.$refs.block.scrollTop = this.$refs.block.scrollHeight;
             });
         },
-        showQuestions() {
+        showInfo() {
             this.addMessage('?');
             let output = 'Список возможных вопросов и команд:';
-            for (let i = 0; i < this.questions.length; i++) {
-                output += '\n\t' + '- ' + this.questions[i];
+            for (let i = 0; i < this.info.length; i++) {
+                output += '\n\t' + '- ' + this.info[i];
             }
             this.addMessage(output);
         },
@@ -122,6 +114,16 @@ export default {
             this.addMessage(this.keyboardText);
             this.process(this.keyboardText);
             this.keyboardText = '';
+        },
+        process(input) {
+            //let answer = pr.process(input);
+            let answer = this.Process.do(input);
+            this.addMessage(answer);
+            this.speakResponse(answer);
+        },
+        speakResponse(response) {
+            const synth = window.speechSynthesis;
+            synth.speak(new SpeechSettings(response).get());
         },
     },
 };
