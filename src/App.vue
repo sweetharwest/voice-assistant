@@ -21,13 +21,14 @@
                 <option value="3">третий</option>
             </select>
         </div>
-        <Assistant :questions="questions" :commands="commands"/>
+        <Assistant :questions="questions" :commands="commands" :data="data9"/>
     </main>
 </template>
 
 <script>
 import {Question} from "@/components/question.js";
 import {Command} from "@/components/command.js";
+import * as data from "./components/data.js"
 export default {
     data() {
         return {
@@ -39,19 +40,30 @@ export default {
                 new Command('нажми кнопку отправить', this.click, 'none'),
                 new Command('запиши', this.write, 'write'),
                 new Command('выбери вариант', this.choose, 'choose')
-            ]
+            ],
+            data9: new Map([
+                [data.serializedData1, this.click],
+                [data.serializedData2, this.write],
+                [data.serializedData3, this.choose],
+                [data.serializedData4, "none"],
+                [data.serializedData5, "none"],
+            ])
         }
     },
     methods: {
         click() {
             return "Нажата кнопка отправить";
         },
-        write(text) {
+        write(serializedData) {
+            const data = JSON.parse(serializedData);
+            const text = data.param.pop();
             let elementDOM = document.getElementById('testInput');
             elementDOM.value = text;
             return "текст записан";
         },
-        choose(option) {
+        choose(serializedData) {
+            const data = JSON.parse(serializedData);
+            const option = data.param.pop();
             let elementDOM = document.getElementById('testSelect');
             for (let i = 0; i < elementDOM.length; i++) {
                 if (elementDOM[i].value === option) {

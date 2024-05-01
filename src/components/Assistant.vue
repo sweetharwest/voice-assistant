@@ -1,5 +1,8 @@
 <template>
     <div class="a-container">
+        <div class="assistant-header">
+            Голосовой помощник
+        </div>
         <div ref="block" class="message-container">
             <ul>
                 <li v-for="(message, index) in messages" :key="index" :class="['message', index % 2 === 0 ? 'right' : 'left']">
@@ -40,6 +43,7 @@
 <script>
 import {Process} from "@/components/process.js";
 import {SpeechSettings} from "@/components/speechSettings.js";
+import {Process2} from "@/components/process2.js";
 export default {
     data() {
         return {
@@ -51,6 +55,7 @@ export default {
             keyboard: false,
             keyboardText: '',
             Process: null,
+            Process2: null,
             info: ['Как отправить работу?',
                         'Что ты умеешь?',
                         'Нажми кнопку отправить',
@@ -62,6 +67,7 @@ export default {
     props: {
         questions: Array,
         commands: Array,
+        data: Map,
     },
     mounted() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -71,6 +77,7 @@ export default {
         this.recognition.lang = 'ru-RU';
 
         this.Process = new Process(this.questions, this.commands);
+        this.Process2 = new Process2(this.data);
 
         this.recognition.onresult = (event) => {
             this.recognizedText = event.results[0][0].transcript;
@@ -117,9 +124,12 @@ export default {
         },
         process(input) {
             //let answer = pr.process(input);
-            let answer = this.Process.do(input);
-            this.addMessage(answer);
-            this.speakResponse(answer);
+            //let answer = this.Process.do(input);
+            //this.addMessage(answer);
+            //this.speakResponse(answer);
+            let answer2 = this.Process2.do(input);
+            //this.addMessage("second version");
+            this.addMessage(answer2);
         },
         speakResponse(response) {
             const synth = window.speechSynthesis;
@@ -136,11 +146,20 @@ export default {
     right: 50px;
     bottom: 50px;
     padding: 20px;
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-family: Arial, sans-serif;
     position: fixed;
+}
+
+.assistant-header {
+    width: 600px;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    text-align: center;
+    //background-color: #2c3e50;
+    //padding: 10px;
 }
 
 .keyboard {
@@ -175,6 +194,8 @@ export default {
     overflow-y: scroll; /* Включение вертикальной прокрутки */
     border: 1px solid #ccc; /* Добавление рамки для блока */
     padding: 10px;
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 .message {
