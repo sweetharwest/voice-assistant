@@ -3,9 +3,6 @@
 </script>
 
 <template>
-    <header>
-    </header>
-
     <main>
         <div>
             <p>контрольная работа</p>
@@ -21,32 +18,21 @@
                 <option value="3">третий</option>
             </select>
         </div>
-        <Assistant :questions="questions" :commands="commands" :data="data9"/>
+        <Assistant :commandData="commandData" :infoData="data.serializedInfoData"/>
     </main>
 </template>
 
 <script>
-import {Question} from "@/components/question.js";
-import {Command} from "@/components/command.js";
 import * as data from "./components/data.js"
 export default {
     data() {
         return {
-            questions: [
-                new Question('как отправить работу', 'Для того чтобы отправить работу нужно выбрать название контрольной, вариант работы и задание. После этого прикрепить файлы и нажать кнопку отправить.'),
-                new Question('что ты умеешь', 'Я умею записывать, отправлять, перечислять и выбирать')
-            ],
-            commands: [
-                new Command('нажми кнопку отправить', this.click, 'none'),
-                new Command('запиши', this.write, 'write'),
-                new Command('выбери вариант', this.choose, 'choose')
-            ],
-            data9: new Map([
-                [data.serializedData1, this.click],
-                [data.serializedData2, this.write],
-                [data.serializedData3, this.choose],
-                [data.serializedData4, "none"],
-                [data.serializedData5, "none"],
+            commandData: new Map([
+                [data.serializedCommandData1, this.click],
+                [data.serializedCommandData2, this.write],
+                [data.serializedCommandData3, this.choose],
+                [data.serializedCommandData4, "none"],
+                [data.serializedCommandData5, "none"],
             ])
         }
     },

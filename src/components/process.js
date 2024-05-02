@@ -1,36 +1,34 @@
-export class Process{
-    questions;
-    commands;
+export class Process {
+    dataMap;
 
-    constructor(questions, commands) {
-        this.questions = questions;
-        this.commands = commands;
+    constructor(dataMap) {
+        this.dataMap = dataMap;
     }
 
     do(request) {
+        //форматирование входящего запроса
         request = request.toLowerCase();
         request = request.replace(/[.,!?]/g, "").replace(/\s{2,}/g, " ");
 
-        for (let i = 0; i < this.questions.length; i++) {
-            if (this.questions[i].question === request) {
-                return this.questions[i].answer;
-            }
-        }
-
-        for (let i = 0; i < this.commands.length; i++) {
-            if (request.startsWith(this.commands[i].keyPhrase)) {
-                switch (this.commands[i].type) {
-                    case "none":
-                        return this.commands[i].method();
-                    case "write":
-                        let text = request.substring(this.commands[i].keyPhrase.length + 1);
-                        return this.commands[i].method(text);
-                    case "choose":
-                        let option = request.substring(this.commands[i].keyPhrase.length + 1);
-                        return this.commands[i].method(option);
-                    default:
-                        return "тип команды не найден";
+        //обработка входящего запроса
+        for (let dataKeyValue of this.dataMap) {
+            let data = JSON.parse(dataKeyValue[0]);
+            let keyPhrase = data.keyPhrase;
+            if (request.startsWith(keyPhrase)) {
+                switch (data.type){
+                    case "command":
+                        if (data.hasParam) {
+                            let param = request.substring(data.keyPhrase.length + 1);
+                            data.param.push(param);
+                        }
+                        let serializedData = JSON.stringify(data);
+                        return dataKeyValue[1](serializedData);
+                    case "question":
+                        if (request === keyPhrase) {
+                            return data.answer;
+                        }
                 }
+
             }
         }
         return "команда не найдена";
